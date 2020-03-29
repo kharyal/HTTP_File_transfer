@@ -1,5 +1,7 @@
 import socket
 import time
+import os
+import comds
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -19,8 +21,17 @@ while True:
 
     while connected == True:
         data = client_socket.recv(1024)
-        if data.decode() == '':
+        if not data:
             connected = False
             break
-        print('Server recieved data: ' + data.decode())
+        print('$> ' + data.decode())
+        command = str(data.decode()).split(" ")
+
+        if command[0] == "IndexGet":
+            comds.ind_get(command[1:],client_socket)
+            client_socket.send("-|-|-".encode())
+
+    
+    print("connection Lost")
     client_socket.close()
+
