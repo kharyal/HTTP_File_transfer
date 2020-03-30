@@ -2,6 +2,16 @@ import os
 import time
 import datetime
 
+def find_file_type(filename):
+    name_dict = {
+        '.txt':'Text', '.pdf':'PDF', '.py':'Python', '.jpg':'Image',
+        '.jpeg':'Image', '.png':'Image', '.sh':'Bash', '.pyc':'Python-cache'
+    }
+    for ext in list(name_dict.keys()):
+        if filename.endswith(ext):
+            return name_dict[ext]
+    return "Directory"
+
 def send_files_shortlist(arg, file_list, s, pwd):
     mon_dict = {
         'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6,
@@ -16,7 +26,7 @@ def send_files_shortlist(arg, file_list, s, pwd):
             if os.path.isdir(pwd+str(file_list[i])):
                 send_files_shortlist(arg, os.listdir(pwd+str(file_list[i])), s, pwd+str(file_list[i])+'/')
 
-    elif l == 3:
+    elif l >= 3:
         start_date = int(arg[1].split(":")[0])
         start_month = mon_dict[arg[1].split(":")[1]]
         start_year = int(arg[1].split(":")[2])
@@ -46,6 +56,11 @@ def send_files_shortlist(arg, file_list, s, pwd):
             time_sec = int(tim[3].split(":")[2])
             year = int(tim[4])
             sz = str(st.st_size)
+            typ = find_file_type(pwd+str(f))
+            if l>3 and not (pwd+str(f)).endswith(arg[3][1:]):
+                if os.path.isdir(pwd+str(f)):
+                    send_files_shortlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
+                continue
 
             d = datetime.date(year, month, date)
             if d>=st_d and d<=end_d:
@@ -54,7 +69,7 @@ def send_files_shortlist(arg, file_list, s, pwd):
                     print(pwd+str(f))
                     s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
                     + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
-                    ":" + str(time_sec)+ "    " + sz +"\n").encode())
+                    ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
                     if os.path.isdir(pwd+str(f)):
                         send_files_shortlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
         
