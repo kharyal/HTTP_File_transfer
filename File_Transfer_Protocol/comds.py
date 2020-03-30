@@ -99,12 +99,22 @@ def send_files_longlist(arg, file_list, s, pwd):
             if os.path.isdir(pwd+str(f)):
                 send_files_longlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
             continue
+        
+        if l<=2:
+            print(pwd+str(f))
 
-        print(pwd+str(f))
-
-        s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
-        + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
-        ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
+            s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
+            + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
+            ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
+        elif l>2:            
+            if os.path.isfile(pwd+f):
+                with open(pwd+f) as file:
+                    contents = file.read()
+                    if arg[2] in contents:
+                        print(pwd+f)
+                        s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
+                        + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
+                        ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
 
         if os.path.isdir(pwd+str(f)):
             send_files_longlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
@@ -120,4 +130,4 @@ def  ind_get(arg, s):
         send_files_longlist(arg, file_list, s, "./")
 
 if __name__=="__main__":
-    ind_get(['longlist'],'s')
+    ind_get(['longlist', '*txt', 'abba'],'s')

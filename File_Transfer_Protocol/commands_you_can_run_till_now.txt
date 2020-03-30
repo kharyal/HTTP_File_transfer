@@ -11,3 +11,7 @@ IndexGet longlist
 
 IndexGet longlist ext
 	ext: eg: *.py, *.txt, *.pdf etc.
+
+IndexGet longlist ext keyword
+	Searches for files with extension ext containing the keyword
+	eg: IndexGet longlist *.txt abba
