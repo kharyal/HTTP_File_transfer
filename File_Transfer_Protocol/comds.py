@@ -45,13 +45,16 @@ def send_files_shortlist(arg, file_list, s, pwd):
             time_min = int(tim[3].split(":")[1])
             time_sec = int(tim[3].split(":")[2])
             year = int(tim[4])
-            
+            sz = str(st.st_size)
+
             d = datetime.date(year, month, date)
             if d>=st_d and d<=end_d:
                 tim = datetime.time(time_hrs, time_min, time_sec)
                 if tim>=st_t and tim<end_t:
                     print(pwd+str(f))
-                    s.send((pwd+str(f)+"\n").encode())
+                    s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
+                    + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
+                    ":" + str(time_sec)+ "    " + sz +"\n").encode())
                     if os.path.isdir(pwd+str(f)):
                         send_files_shortlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
         
