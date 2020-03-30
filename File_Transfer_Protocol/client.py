@@ -3,7 +3,7 @@ import socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = socket.gethostname()
-port = 9990
+port = 9992
 client_socket.connect((host, port))
 
 def ind_get(arg):

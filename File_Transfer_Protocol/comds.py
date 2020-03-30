@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 
+###### General functions that can be used anywhere ######
 def find_file_type(filename):
     name_dict = {
         '.txt':'Text', '.pdf':'PDF', '.py':'Python', '.jpg':'Image',
@@ -12,6 +13,7 @@ def find_file_type(filename):
             return name_dict[ext]
     return "Directory"
 
+###### Functions for IndexGet command ######
 def send_files_shortlist(arg, file_list, s, pwd):
     mon_dict = {
         'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6,
@@ -72,12 +74,50 @@ def send_files_shortlist(arg, file_list, s, pwd):
                     ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
                     if os.path.isdir(pwd+str(f)):
                         send_files_shortlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
+
+
+def send_files_longlist(arg, file_list, s, pwd):
+    mon_dict = {
+        'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6,
+        'Jul':7, 'Aug':8, 'Sep':9, 'Oct':10, 'Nov':11, 'Dec':12
+    }
+    l = len(arg)
+    for f in file_list:
+        st = os.stat(pwd+str(f))
+        tim = time.ctime(st.st_ctime).split(" ")
+        month = mon_dict[tim[1]]
+        date = int(tim[2])
+        time_hrs = int(tim[3].split(":")[0])
+        time_min = int(tim[3].split(":")[1])
+        time_sec = int(tim[3].split(":")[2])
+        year = int(tim[4])
+        sz = str(st.st_size)
+        tim = datetime.time(time_hrs, time_min, time_sec)
+        typ = find_file_type(pwd+str(f))
         
+        if l>1 and not (pwd+str(f)).endswith(arg[1][1:]):
+            if os.path.isdir(pwd+str(f)):
+                send_files_longlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
+            continue
+
+        print(pwd+str(f))
+
+        s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
+        + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
+        ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
+
+        if os.path.isdir(pwd+str(f)):
+            send_files_longlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
+
 
 def  ind_get(arg, s):
     if arg[0] == 'shortlist':
         file_list = os.listdir()
         send_files_shortlist(arg,file_list,s, "./")
 
+    if arg[0] == 'longlist':
+        file_list = os.listdir()
+        send_files_longlist(arg, file_list, s, "./")
+
 if __name__=="__main__":
-    ind_get(['shortlist','30:Mar:2020:00:00:00','30:Mar:2020:10:00:00'],'s')
+    ind_get(['longlist'],'s')

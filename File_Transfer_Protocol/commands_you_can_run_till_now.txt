@@ -1,0 +1,13 @@
+Indexget shortlist
+
+IndexGet shortlist <start-timestamp> <end-timestamp>
+	timestamps of form: dd:mmm:yyyy:hr:mn:ss
+	eg: 30:Mar:2020:00:00:00
+
+IndexGet shortlist <start-timestamp> <end-timestamp> ext
+	ext: eg: *.py, *.txt, *.pdf etc.
+
+IndexGet longlist
+
+IndexGet longlist ext
+	ext: eg: *.py, *.txt, *.pdf etc.
