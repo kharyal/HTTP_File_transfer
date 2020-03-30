@@ -1,6 +1,7 @@
 import os
 import time
 import datetime
+import hashlib
 
 ###### General functions that can be used anywhere ######
 def find_file_type(filename):
@@ -129,5 +130,42 @@ def  ind_get(arg, s):
         file_list = os.listdir()
         send_files_longlist(arg, file_list, s, "./")
 
+###### Functions for Hashfile command ######
+def verify_md5(filename, s):
+    md5 = hashlib.md5()
+    fil = open(filename)
+    contents = fil.read(1024*15)
+    while len(contents)>0:
+        md5.update(contents.encode())
+        contents = fil.read(1024*15)
+
+    if os.path.isfile(filename):
+        st = os.stat(filename)
+        tim = time.ctime(st.st_mtime).split(" ")
+        date = tim[2]
+        month = tim[1]
+        year = tim[4]
+        timst = tim[3]
+        date_and_time = date+":"+month+":"+year+":"+timst
+        print(filename+"   "+date_and_time+"   "+md5.hexdigest())
+        s.send((filename+"   "+date_and_time+"   "+md5.hexdigest()).encode())
+
+def check_all(file_list,s, pwd):
+    for f in file_list:
+        if os.path.isdir(pwd+f):
+            check_all(os.listdir(pwd+f), s, pwd+f+"/")
+            continue
+        if f.endswith('.pyc'):
+            continue
+        verify_md5(pwd+f,s)
+
+def file_hash(arg, s):
+    if arg[0] == 'verify':
+        verify_md5(arg[1],s)
+    
+    elif arg[0] == 'checkall':
+        file_list = os.listdir('./')
+        check_all(file_list, s, './')
+
 if __name__=="__main__":
-    ind_get(['longlist', '*txt', 'abba'],'s')
+    file_hash(['checkall'],'s')

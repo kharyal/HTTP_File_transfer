@@ -7,7 +7,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = socket.gethostname()
 
-port = 9992
+port = 9991
 server_socket.bind((host, port))
 
 server_socket.listen(5)
@@ -29,6 +29,10 @@ while True:
 
         if command[0] == "IndexGet":
             comds.ind_get(command[1:],client_socket)
+            client_socket.send("-|-|-".encode())
+
+        if command[0] == "FileHash":
+            comds.file_hash(command[1:],client_socket)
             client_socket.send("-|-|-".encode())
 
     
