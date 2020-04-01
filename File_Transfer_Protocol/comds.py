@@ -52,6 +52,10 @@ def send_files_shortlist(arg, file_list, s, pwd):
         for f in file_list:
             st = os.stat(pwd+str(f))
             tim = time.ctime(st.st_ctime).split(" ")
+            for t in range(len(tim)-1,-1,-1):
+                if tim[t] == "" or tim[t] == " ":
+                    tim.pop(t)
+
             month = mon_dict[tim[1]]
             date = int(tim[2])
             time_hrs = int(tim[3].split(":")[0])
@@ -86,6 +90,11 @@ def send_files_longlist(arg, file_list, s, pwd):
     for f in file_list:
         st = os.stat(pwd+str(f))
         tim = time.ctime(st.st_ctime).split(" ")
+        for t in range(len(tim)-1,-1,-1):
+            if tim[t] == "" or tim[t] == " ":
+                tim.pop(t)
+                
+
         month = mon_dict[tim[1]]
         date = int(tim[2])
         time_hrs = int(tim[3].split(":")[0])
@@ -168,4 +177,4 @@ def file_hash(arg, s):
         check_all(file_list, s, './')
 
 if __name__=="__main__":
-    file_hash(['checkall'],'s')
+    ind_get(['longlist'],'s')
