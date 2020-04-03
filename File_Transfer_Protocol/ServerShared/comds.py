@@ -3,6 +3,7 @@ import time
 import datetime
 import hashlib
 import tqdm
+import socket
 
 ###### General functions that can be used anywhere ######
 def find_file_type(filename):
@@ -162,8 +163,8 @@ def verify_md5(filename, s, with_file_size = False):
             s.send((filename+"   "+date_and_time+"   "+md5.hexdigest()).encode())
         else:
             sz = st.st_size
-            print(filename+"   "+str(sz)+"  "+date_and_time+"   "+md5.hexdigest())
-            s.send((filename+"   "+str(sz)+"  "+date_and_time+"   "+md5.hexdigest()).encode())
+            print(filename+"   "+str(sz)+"   "+date_and_time+"   "+md5.hexdigest())
+            s.send((filename+"   "+str(sz)+"   "+date_and_time+"   "+md5.hexdigest()).encode())
 
 def check_all(file_list,s, pwd):
     for f in file_list:
@@ -198,10 +199,46 @@ def send_tcp(filename,s):
     else:
         print("File doesn't exist")
 
+def send_udp(filename,s):
+    s.send("ready_for_sending".encode())
+    if s.recv(1024).decode()[-14:] == "begin_download":
+        if os.path.isfile(filename):
+            md5 = hashlib.md5()
+            udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            address = ('', 10000)
+            f = open(filename)
+            sz = os.stat(filename).st_size
+
+            progress = tqdm.tqdm(range(sz), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024, ascii=True)
+            contents = f.read(1024*15)
+            while len(contents)>0:
+                to_send = contents.encode()
+                udp_socket.sendto(to_send,address)
+                md5.update(contents.encode())
+                progress.update(len(contents))
+                contents = f.read(1024*15)
+
+            st = os.stat(filename)
+            tim = time.ctime(st.st_mtime).split(" ")
+            date = tim[2]
+            month = tim[1]
+            year = tim[4]
+            timst = tim[3]
+            date_and_time = date+":"+month+":"+year+":"+timst
+            sz = st.st_size
+            print(filename+"   "+str(sz)+"   "+date_and_time+"   "+md5.hexdigest())
+            udp_socket.sendto(("   "+filename+"   "+str(sz)+"   "+date_and_time+"   "+md5.hexdigest()).encode(),address)
+            udp_socket.sendto("-|-|-".encode(), address)
+        else:
+            print("File doesn't exist")
+
 def file_download(arg,s):
     if len(arg)>=2:
         if arg[0] == 'tcp':
             send_tcp(arg[1],s)
+        
+        elif arg[0] == 'udp':
+            send_udp(arg[1],s)
 
 if __name__=="__main__":
     file_download(['tcp', 'shared2.txt'],'s')

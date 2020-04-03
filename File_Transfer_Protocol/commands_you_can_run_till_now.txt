@@ -16,6 +16,10 @@ IndexGet longlist ext keyword
 	Searches for files with extension ext containing the keyword
 	eg: IndexGet longlist *.txt abba
 
-FileHash verify
+FileHash verify <filename>
 
 FileHash checkall
+
+FileDownload tcp <filename>
+
+FileDownload udp <filename>
