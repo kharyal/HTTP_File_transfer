@@ -23,3 +23,7 @@ FileHash checkall
 FileDownload tcp <filename>
 
 FileDownload udp <filename>
+
+Caching verify <filename>
+
+Caching show
