@@ -7,7 +7,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = socket.gethostname()
 
-port = 9998
+port = 9992
 server_socket.bind((host, port))
 
 server_socket.listen(5)
@@ -35,6 +35,9 @@ while True:
             comds.file_hash(command[1:],client_socket)
             client_socket.send("-|-|-".encode())
 
+        if command[0] == "FileDownload":
+            comds.file_download(command[1:],client_socket)
+            client_socket.send("-|-|-".encode())
     
     print("connection Lost")
     client_socket.close()

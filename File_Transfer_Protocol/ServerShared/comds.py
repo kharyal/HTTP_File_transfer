@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import hashlib
+import tqdm
 
 ###### General functions that can be used anywhere ######
 def find_file_type(filename):
@@ -140,7 +141,7 @@ def  ind_get(arg, s):
         send_files_longlist(arg, file_list, s, "./")
 
 ###### Functions for Hashfile command ######
-def verify_md5(filename, s):
+def verify_md5(filename, s, with_file_size = False):
     md5 = hashlib.md5()
     fil = open(filename)
     contents = fil.read(1024*15)
@@ -156,8 +157,13 @@ def verify_md5(filename, s):
         year = tim[4]
         timst = tim[3]
         date_and_time = date+":"+month+":"+year+":"+timst
-        print(filename+"   "+date_and_time+"   "+md5.hexdigest())
-        s.send((filename+"   "+date_and_time+"   "+md5.hexdigest()).encode())
+        if not with_file_size:
+            print(filename+"   "+date_and_time+"   "+md5.hexdigest())
+            s.send((filename+"   "+date_and_time+"   "+md5.hexdigest()).encode())
+        else:
+            sz = st.st_size
+            print(filename+"   "+str(sz)+"  "+date_and_time+"   "+md5.hexdigest())
+            s.send((filename+"   "+str(sz)+"  "+date_and_time+"   "+md5.hexdigest()).encode())
 
 def check_all(file_list,s, pwd):
     for f in file_list:
@@ -176,5 +182,26 @@ def file_hash(arg, s):
         file_list = os.listdir('./')
         check_all(file_list, s, './')
 
+###### Functions for FileDownload command ######
+def send_tcp(filename,s):
+    if os.path.isfile(filename):
+        f = open(filename)
+        sz = os.stat(filename).st_size
+        progress = tqdm.tqdm(range(sz), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024, ascii=True)
+        contents = f.read(1024*15)
+        while len(contents)>0:
+            s.send(contents.encode())
+            progress.update(len(contents))
+            contents = f.read(1024*15)
+        s.send("  ".encode())
+        verify_md5(filename, s, with_file_size=True)
+    else:
+        print("File doesn't exist")
+
+def file_download(arg,s):
+    if len(arg)>=2:
+        if arg[0] == 'tcp':
+            send_tcp(arg[1],s)
+
 if __name__=="__main__":
-    ind_get(['longlist'],'s')
+    file_download(['tcp', 'shared2.txt'],'s')
