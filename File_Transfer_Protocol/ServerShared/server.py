@@ -39,7 +39,7 @@ while True:
             comds.file_download(command[1:],client_socket)
             if command[1] == "tcp":
                 client_socket.send("-|-|-".encode())
-    
+
     print("connection Lost")
     client_socket.close()
 
