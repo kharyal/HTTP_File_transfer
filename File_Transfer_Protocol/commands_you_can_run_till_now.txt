@@ -27,3 +27,6 @@ FileDownload udp <filename>
 Caching verify <filename>
 
 Caching show
+
+MyFiles
+	Shows client side files

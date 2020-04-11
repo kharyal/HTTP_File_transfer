@@ -205,6 +205,16 @@ def cach_e(arg):
             data = cache_data[dataline].split("   ")[-3]
             print(filename+"   "+data)
 
+def explore_files(file_list, pwd):
+    for file in file_list:
+        print(pwd + " " + file)
+        if os.path.isdir(file):
+            explore_files(os.listdir(pwd + file + "/"),pwd + file + "/")
+
+def show_client_files():
+    file_list = os.listdir()
+    explore_files(file_list, "./")
+
 
 while True:
     print("$> ", end = " ")
@@ -222,6 +232,8 @@ while True:
         download(command[1:])
     elif command[0] == "Caching":
         cach_e(command[1:])
+    elif command[0] == "MyFiles":
+        show_client_files()
     elif command[0] == "Teardown":
         client_socket.close()
         exit()
