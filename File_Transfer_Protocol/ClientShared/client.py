@@ -37,7 +37,7 @@ def download(arg):
             stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
             print(stats)
 
-            downloaded_data = fdata[:len(fdata)-len(stats)]
+            downloaded_data = fdata[:len(fdata)-len(stats)-2]
 
         if arg[0] == 'udp':
             udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -62,7 +62,7 @@ def download(arg):
             stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
             print(stats)
 
-            downloaded_data = fdata[:len(fdata)-len(stats)]
+            downloaded_data = fdata[:len(fdata)-len(stats)-2]
 
 
         if os.path.isfile(arg[1]):
@@ -215,6 +215,24 @@ def show_client_files():
     file_list = os.listdir()
     explore_files(file_list, "./")
 
+def upload(arg):
+    if client_socket.recv().decode() == "Ready":
+        if len(arg)>=1:
+            if os.path.isfile(arg[0]):
+                f = open(arg[0])
+                sz = os.stat(arg[0]).st_size
+                progress = tqdm.tqdm(range(sz), f"Uploading {arg[0]}", unit="B", unit_scale=True, unit_divisor=1024, ascii=True)
+                contents = f.read(1024*15)
+                while len(contents)>0:
+                    client_socket.send(contents.encode())
+                    progress.update(len(contents))
+                    contents = f.read(1024*15)
+            else:
+                print("File doesn't exist")
+        else:
+            print("Not enough arguments")
+
+
 
 while True:
     print("$> ", end = " ")
@@ -234,6 +252,8 @@ while True:
         cach_e(command[1:])
     elif command[0] == "MyFiles":
         show_client_files()
+    elif command [0] == "FileUpload":
+        upload(command[1:])
     elif command[0] == "Teardown":
         client_socket.close()
         exit()

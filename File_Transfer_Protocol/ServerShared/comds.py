@@ -194,7 +194,7 @@ def send_tcp(filename,s):
             s.send(contents.encode())
             progress.update(len(contents))
             contents = f.read(1024*15)
-        s.send("  ".encode())
+        s.send("   ".encode())
         verify_md5(filename, s, with_file_size=True)
     else:
         print("File doesn't exist")
