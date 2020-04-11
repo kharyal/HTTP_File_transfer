@@ -240,5 +240,25 @@ def file_download(arg,s):
         elif arg[0] == 'udp':
             send_udp(arg[1],s)
 
+def file_upload(arg,s):
+    fdata = ""
+    s.send("Ready".encode())
+    while True:
+        data = s.recv(1024)
+        if str(data.decode()[-5:]) == "-|-|-":
+            fdata = fdata + str(data.decode()[:-5])
+            # print(fdata)
+            break
+        else:
+            fdata = fdata + str(data.decode())
+    
+    if os.path.isfile(arg[0]):
+        print("File already exists")
+    else:
+        f = open(arg[0],'w')
+        f.write(fdata)
+        f.close()
+
+
 if __name__=="__main__":
     file_download(['tcp', 'shared2.txt'],'s')

@@ -30,3 +30,6 @@ Caching show
 
 MyFiles
 	Shows client side files
+
+FileUpload <filename>
+	Uploads the file with <filename> to server

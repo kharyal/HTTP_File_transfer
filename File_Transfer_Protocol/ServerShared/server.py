@@ -40,6 +40,9 @@ while True:
             if command[1] == "tcp":
                 client_socket.send("-|-|-".encode())
 
+        if command[0] == "FileUpload":
+            comds.file_upload(command[1:], client_socket)
+
     print("connection Lost")
     client_socket.close()
 

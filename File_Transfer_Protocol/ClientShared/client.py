@@ -216,7 +216,7 @@ def show_client_files():
     explore_files(file_list, "./")
 
 def upload(arg):
-    if client_socket.recv().decode() == "Ready":
+    if client_socket.recv(1024).decode() == "Ready":
         if len(arg)>=1:
             if os.path.isfile(arg[0]):
                 f = open(arg[0])
@@ -227,6 +227,7 @@ def upload(arg):
                     client_socket.send(contents.encode())
                     progress.update(len(contents))
                     contents = f.read(1024*15)
+                client_socket.send("-|-|-".encode())
             else:
                 print("File doesn't exist")
         else:
