@@ -180,7 +180,11 @@ def check_all(file_list,s, pwd):
 
 def file_hash(arg, s):
     if arg[0] == 'verify':
-        verify_md5(arg[1],s)
+        if os.path.isfile(arg[1]):
+            verify_md5(arg[1],s)
+        else:
+            print(arg[1] + " " + "File doesn't exist")
+            s.send((arg[1] + " " + "File doesn't exist").encode())
     
     elif arg[0] == 'checkall':
         file_list = os.listdir('./')
@@ -204,6 +208,7 @@ def send_tcp(filename,s):
         verify_md5(filename, s, with_file_size=True)
     else:
         print("File doesn't exist")
+        s.send("inv_fil".encode())
 
 def send_udp(filename,s):
     s.send("ready_for_sending".encode())
@@ -237,6 +242,8 @@ def send_udp(filename,s):
             udp_socket.sendto("-|-|-".encode(), address)
         else:
             print("File doesn't exist")
+            s.send("inv_fil".encode())
+            s.send("-|-|-".encode())
 
 def file_download(arg,s):
     if len(arg)>=2:
@@ -245,6 +252,9 @@ def file_download(arg,s):
         
         elif arg[0] == 'udp':
             send_udp(arg[1],s)
+
+        else:
+            s.send("inv_arg".encode())
 
 def file_upload(arg,s):
     fdata = ""

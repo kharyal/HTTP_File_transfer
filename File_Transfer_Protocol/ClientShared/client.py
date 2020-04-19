@@ -29,22 +29,27 @@ def get_data():
 
 def download(arg):
     fdata = ""
+    invalid_file = False
     if len(arg) >= 2:
         if arg[0] == 'tcp':
             while True:
                 data = client_socket.recv(1024)
+                if data.decode()[:7] == "inv_fil":
+                    print("File doesnt exist")
+                    invalid_file = True
                 if str(data.decode()[-5:]) == "-|-|-":
-                    fdata = fdata + str(data.decode()[:-5])
+                    if not invalid_file:
+                        fdata = fdata + str(data.decode()[:-5])
                     # print(fdata)
                     break
                 else:
-                    fdata = fdata + str(data.decode())
-            
-            stats = fdata.split("   ")[-4:]
-            stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
-            print(stats)
-
-            downloaded_data = fdata[:len(fdata)-len(stats)-2]
+                    if not invalid_file:
+                        fdata = fdata + str(data.decode())
+            if not invalid_file:
+                stats = fdata.split("   ")[-4:]
+                stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
+                print(stats)
+                downloaded_data = fdata[:len(fdata)-len(stats)-2]
 
         if arg[0] == 'udp':
             udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -59,27 +64,33 @@ def download(arg):
             
             while True:
                 data = udp_sock.recvfrom(1024*5)
+                if data.decode()[:7] == "inv_fil":
+                    print("File doesnt exist")
+                    invalid_file = True
                 if str(data[0].decode()[-5:]) == "-|-|-":
-                    fdata = fdata + str(data[0].decode()[:-5])
+                    if not invalid_file:
+                        fdata = fdata + str(data[0].decode()[:-5])
                     break
-                fdata = fdata + str(data[0].decode())
+                if not invalid_file:
+                    fdata = fdata + str(data[0].decode())
 
-            # print(fdata.split("   "))
-            stats = fdata.split("   ")[-4:]
-            stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
-            print(stats)
+            if not invalid_file:
+                # print(fdata.split("   "))
+                stats = fdata.split("   ")[-4:]
+                stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
+                print(stats)
 
-            downloaded_data = fdata[:len(fdata)-len(stats)-2]
-
+                downloaded_data = fdata[:len(fdata)-len(stats)-2]
 
         if os.path.isfile(arg[1]):
             print("File already exists")
-            return fdata
+            return fdata, invalid_file
         else:
-            f = open(arg[1],'w')
-            f.write(downloaded_data)
-            f.close()
-            return fdata
+            if not invalid_file:
+                f = open(arg[1],'w')
+                f.write(downloaded_data)
+                f.close()
+            return fdata, invalid_file
 
 def cach_e(arg):
     if arg[0] == "verify":
@@ -114,94 +125,96 @@ def cach_e(arg):
             ch.close()
             command = "FileDownload tcp "+str(arg[1])
             client_socket.send(command.encode())
-            fdata = download(command.split(" ")[1:])
-            ch = open(".cache")
-            cache_data = ch.readlines()
-            ch.close()
-            fcfs = []
-            if len(cache_data)>0:
-                fcfs = cache_data[0].strip('\n')
-                fcfs = fcfs.split(" ")
-                for i in range(len(fcfs)-1,-1,-1):
-                    if fcfs[i] == '' or fcfs[i] == ' ':
-                        fcfs.pop(i)
-                
-                # print(fcfs)
-                fcfs = list(map(int, fcfs))
-            if len(fcfs)>=cache_sz:
-                lines_to_remove = cache_data[2*fcfs[-1]+2].strip('\n').split("-")
-                lines_to_remove = list(map(int, lines_to_remove))
-                no_lines_to_remove = lines_to_remove[1]-lines_to_remove[0]+1
-                l = []
-                for i in range(2,2*cache_sz+1,2):
-                    l = deepcopy(l)
-                    l = cache_data[i].split("-")
-                    l = list(map(int, l))
-                    l[0] = l[0] - no_lines_to_remove
-                    l[1] = l[1] - no_lines_to_remove
-                    # print(l[0],l[1])
-                    l = list(map(str, l))
-                    cache_data[i] = l[0]+"-"+l[1]+'\n'
+            fdata, invalid_file = download(command.split(" ")[1:])
 
-                no_lines_to_write = len(fdata.split('\n'))
-                total_lines = len(cache_data)
-                new_entry_start = total_lines - no_lines_to_remove
-                new_entry_end = new_entry_start + no_lines_to_write -1
-                cache_data[2*fcfs[-1]+1] = arg[1]+'\n'
-                cache_data[2*fcfs[-1]+2] = str(new_entry_start)+"-"+str(new_entry_end)+'\n'
-                ent = fcfs.pop(-1)
-                fcfs.insert(0,ent)
-                fcfs = list(map(str, fcfs))
-                fcfs_str = ""
-                for s in fcfs:
-                    fcfs_str = fcfs_str + " " + s
-                fcfs_str = fcfs_str+'\n'
-                cache_data[0] = fcfs_str
-
-                for lin in range(lines_to_remove[1],lines_to_remove[0]-1, -1):
-                    cache_data.pop(lin)
-                
-                ch = open(".cache",'w')
-                ch.writelines(cache_data)
-                ch.write(fdata+'\n')
+            if not invalid_file:
+                ch = open(".cache")
+                cache_data = ch.readlines()
                 ch.close()
-            
-            elif len(fcfs)>0:
-                no_lines_to_write = len(fdata.split('\n'))
-                total_lines = len(cache_data)
-                new_entry_start = total_lines
-                new_entry_end = new_entry_start + no_lines_to_write - 1
+                fcfs = []
+                if len(cache_data)>0:
+                    fcfs = cache_data[0].strip('\n')
+                    fcfs = fcfs.split(" ")
+                    for i in range(len(fcfs)-1,-1,-1):
+                        if fcfs[i] == '' or fcfs[i] == ' ':
+                            fcfs.pop(i)
 
-                cache_data[2*len(fcfs)+1] = arg[1]+'\n'
-                cache_data[2*len(fcfs)+2] = str(new_entry_start)+"-"+str(new_entry_end)+'\n'
-                fcfs.insert(0,len(fcfs))
-                fcfs = list(map(str, fcfs))
-                fcfs_str = ""
-                for s in fcfs:
-                    fcfs_str = fcfs_str + " " + s
-                fcfs_str = fcfs_str+'\n'
-                cache_data[0] = fcfs_str
+                    # print(fcfs)
+                    fcfs = list(map(int, fcfs))
+                if len(fcfs)>=cache_sz:
+                    lines_to_remove = cache_data[2*fcfs[-1]+2].strip('\n').split("-")
+                    lines_to_remove = list(map(int, lines_to_remove))
+                    no_lines_to_remove = lines_to_remove[1]-lines_to_remove[0]+1
+                    l = []
+                    for i in range(2,2*cache_sz+1,2):
+                        l = deepcopy(l)
+                        l = cache_data[i].split("-")
+                        l = list(map(int, l))
+                        l[0] = l[0] - no_lines_to_remove
+                        l[1] = l[1] - no_lines_to_remove
+                        # print(l[0],l[1])
+                        l = list(map(str, l))
+                        cache_data[i] = l[0]+"-"+l[1]+'\n'
 
-                ch = open(".cache",'w')
-                ch.writelines(cache_data)
-                ch.write(fdata+'\n')
-                ch.close()
+                    no_lines_to_write = len(fdata.split('\n'))
+                    total_lines = len(cache_data)
+                    new_entry_start = total_lines - no_lines_to_remove
+                    new_entry_end = new_entry_start + no_lines_to_write -1
+                    cache_data[2*fcfs[-1]+1] = arg[1]+'\n'
+                    cache_data[2*fcfs[-1]+2] = str(new_entry_start)+"-"+str(new_entry_end)+'\n'
+                    ent = fcfs.pop(-1)
+                    fcfs.insert(0,ent)
+                    fcfs = list(map(str, fcfs))
+                    fcfs_str = ""
+                    for s in fcfs:
+                        fcfs_str = fcfs_str + " " + s
+                    fcfs_str = fcfs_str+'\n'
+                    cache_data[0] = fcfs_str
 
-            else:
-                cache_data = ['\n']*(2*cache_sz+1)
-                total_lines = len(cache_data)
-                new_entry_start = total_lines
-                no_lines_to_write = len(fdata.split('\n')) - 1 
-                new_entry_end = new_entry_start+no_lines_to_write
+                    for lin in range(lines_to_remove[1],lines_to_remove[0]-1, -1):
+                        cache_data.pop(lin)
 
-                cache_data[0] = '0 '+'\n'
-                cache_data[1] = arg[1]+'\n'
-                cache_data[2] = str(new_entry_start)+"-"+str(new_entry_end)+'\n'
+                    ch = open(".cache",'w')
+                    ch.writelines(cache_data)
+                    ch.write(fdata+'\n')
+                    ch.close()
 
-                ch = open(".cache",'w')
-                ch.writelines(cache_data)
-                ch.write(fdata+'\n')
-                ch.close()
+                elif len(fcfs)>0:
+                    no_lines_to_write = len(fdata.split('\n'))
+                    total_lines = len(cache_data)
+                    new_entry_start = total_lines
+                    new_entry_end = new_entry_start + no_lines_to_write - 1
+
+                    cache_data[2*len(fcfs)+1] = arg[1]+'\n'
+                    cache_data[2*len(fcfs)+2] = str(new_entry_start)+"-"+str(new_entry_end)+'\n'
+                    fcfs.insert(0,len(fcfs))
+                    fcfs = list(map(str, fcfs))
+                    fcfs_str = ""
+                    for s in fcfs:
+                        fcfs_str = fcfs_str + " " + s
+                    fcfs_str = fcfs_str+'\n'
+                    cache_data[0] = fcfs_str
+
+                    ch = open(".cache",'w')
+                    ch.writelines(cache_data)
+                    ch.write(fdata+'\n')
+                    ch.close()
+
+                else:
+                    cache_data = ['\n']*(2*cache_sz+1)
+                    total_lines = len(cache_data)
+                    new_entry_start = total_lines
+                    no_lines_to_write = len(fdata.split('\n')) - 1 
+                    new_entry_end = new_entry_start+no_lines_to_write
+
+                    cache_data[0] = '0 '+'\n'
+                    cache_data[1] = arg[1]+'\n'
+                    cache_data[2] = str(new_entry_start)+"-"+str(new_entry_end)+'\n'
+
+                    ch = open(".cache",'w')
+                    ch.writelines(cache_data)
+                    ch.write(fdata+'\n')
+                    ch.close()
 
     if arg[0] == "show":
         ch = open(".cache")
