@@ -11,14 +11,21 @@ port = 9994
 client_socket.connect((host, port))
 
 def get_data():
+    invalid_args = False
     while True:
-        data = client_socket.recv(1024)    
-        # print(str(data.decode()[-5:])=="-|-|-")
+        data = client_socket.recv(1024)
+        if data.decode()[:7] == "inv_arg":
+            print("#### Invalid Arguments ####")
+            invalid_args = True
+        
         if str(data.decode()[-5:]) == "-|-|-":
             # print(str(data.decode()))
-            print(str(data.decode()[:-5]))
+            if invalid_args == False:
+                print(str(data.decode()[:-5]))
             break
-        print(str(data.decode()), end = "")
+        
+        if invalid_args == False:
+            print(str(data.decode()), end = "")
 
 def download(arg):
     fdata = ""
@@ -239,7 +246,7 @@ while True:
     print("$> ", end = " ")
     cmd = str(input())
     command = cmd.split(" ")
-    if command[0] != "Caching":   
+    if command[0] != "Caching":
         client_socket.send(cmd.encode())
     # client_socket.close()
 
@@ -258,3 +265,5 @@ while True:
     elif command[0] == "Teardown":
         client_socket.close()
         exit()
+    else:
+        print("Invalid command")

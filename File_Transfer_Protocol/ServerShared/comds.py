@@ -137,9 +137,12 @@ def  ind_get(arg, s):
         file_list = os.listdir()
         send_files_shortlist(arg,file_list,s, "./")
 
-    if arg[0] == 'longlist':
+    elif arg[0] == 'longlist':
         file_list = os.listdir()
         send_files_longlist(arg, file_list, s, "./")
+
+    else:
+        s.send("inv_arg".encode())
 
 ###### Functions for Hashfile command ######
 def verify_md5(filename, s, with_file_size = False):
@@ -160,7 +163,7 @@ def verify_md5(filename, s, with_file_size = False):
         date_and_time = date+":"+month+":"+year+":"+timst
         if not with_file_size:
             print(filename+"   "+date_and_time+"   "+md5.hexdigest())
-            s.send((filename+"   "+date_and_time+"   "+md5.hexdigest()).encode())
+            s.send((filename+"   "+date_and_time+"   "+md5.hexdigest()+"\n").encode())
         else:
             sz = st.st_size
             print(filename+"   "+str(sz)+"   "+date_and_time+"   "+md5.hexdigest())
@@ -182,6 +185,9 @@ def file_hash(arg, s):
     elif arg[0] == 'checkall':
         file_list = os.listdir('./')
         check_all(file_list, s, './')
+
+    else:
+        s.send("inv_arg".encode())
 
 ###### Functions for FileDownload command ######
 def send_tcp(filename,s):
