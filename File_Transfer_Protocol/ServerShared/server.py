@@ -7,7 +7,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = socket.gethostname()
 
-port = 9994
+port = 9991
 server_socket.bind((host, port))
 
 server_socket.listen(5)

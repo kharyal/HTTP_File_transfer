@@ -7,14 +7,14 @@ cache_sz = 5
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = socket.gethostname()
-port = 9994
+port = 9991
 client_socket.connect((host, port))
 
 def get_data():
     invalid_args = False
     while True:
         data = client_socket.recv(1024)
-        if data.decode()[:7] == "inv_arg":
+        if str(data.decode()[:7]) == "inv_fil":
             print("#### Invalid Arguments ####")
             invalid_args = True
         
@@ -28,28 +28,29 @@ def get_data():
             print(str(data.decode()), end = "")
 
 def download(arg):
-    fdata = ""
+    fdata = b''
     invalid_file = False
     if len(arg) >= 2:
         if arg[0] == 'tcp':
             while True:
                 data = client_socket.recv(1024)
-                if data.decode()[:7] == "inv_fil":
+                if data[:len("inv_fil".encode())] == "inv_fil".encode():
                     print("File doesnt exist")
                     invalid_file = True
-                if str(data.decode()[-5:]) == "-|-|-":
+                
+                if data[-1*len("-|-|-".encode()):] == "-|-|-".encode():
                     if not invalid_file:
-                        fdata = fdata + str(data.decode()[:-5])
+                        fdata = fdata + data[:-1*len("-|-|-".encode())]
                     # print(fdata)
                     break
                 else:
                     if not invalid_file:
-                        fdata = fdata + str(data.decode())
+                        fdata = fdata + data
             if not invalid_file:
-                stats = fdata.split("   ")[-4:]
-                stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
+                stats = fdata.split("   ".encode())[-4:]
+                stats = str(stats[0].decode())+"   "+str(stats[1].decode())+"   "+str(stats[2].decode())+ "   "+str(stats[3].decode())
                 print(stats)
-                downloaded_data = fdata[:len(fdata)-len(stats)-2]
+                downloaded_data = fdata[:len(fdata)-len(stats.encode())-2]
 
         if arg[0] == 'udp':
             udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -62,24 +63,36 @@ def download(arg):
             if client_socket.recv(1024).decode() == "ready_for_sending":
                 client_socket.send("begin_download".encode())
             
-            while True:
-                data = udp_sock.recvfrom(1024*5)
-                if data.decode()[:7] == "inv_fil":
-                    print("File doesnt exist")
-                    invalid_file = True
-                if str(data[0].decode()[-5:]) == "-|-|-":
+            data = udp_sock.recvfrom(1024*15)
+            try:
+                while data:
+                    # data = udp_sock.recvfrom(1024*5)
+                    if data[0][:len("inv_fil".encode())] == "inv_fil".encode():
+                        print("File doesnt exist")
+                        invalid_file = True
+                    # print(data)
+                    # print("-|-|-".encode())
+                    # if data[0][-1*len("-|-|-".encode()):] == "-|-|-".encode():
+                    #     if not invalid_file:
+                    #         fdata = fdata + data[0][:-1*len("-|-|-".encode())]
+                    #     break
                     if not invalid_file:
-                        fdata = fdata + str(data[0].decode()[:-5])
-                    break
-                if not invalid_file:
-                    fdata = fdata + str(data[0].decode())
+                        fdata = fdata + data[0]
+                        break
+                    data = udp_sock.recvfrom(1024*15)
+
+            except socket.timeout:
+                udp_sock.close()
+
 
             if not invalid_file:
                 # print(fdata.split("   "))
-                stats = fdata.split("   ")[-4:]
-                stats = stats[0]+"   "+stats[1]+"   "+stats[2]+ "   "+stats[3]
+                # stats = fdata.split("   ".encode())[-4:]
+                # stats = str(stats[0].decode())+"   "+str(stats[1].decode())+"   "+str(stats[2].decode())+ "   "+str(stats[3].decode())
+                # print(stats)
+                stats = client_socket.recv(1024)
+                stats = stats.decode()
                 print(stats)
-
                 downloaded_data = fdata[:len(fdata)-len(stats)-2]
 
         if os.path.isfile(arg[1]):
@@ -87,7 +100,7 @@ def download(arg):
             return fdata, invalid_file
         else:
             if not invalid_file:
-                f = open(arg[1],'w')
+                f = open(arg[1],'wb')
                 f.write(downloaded_data)
                 f.close()
             return fdata, invalid_file
@@ -239,7 +252,7 @@ def upload(arg):
     if client_socket.recv(1024).decode() == "Ready":
         if len(arg)>=1:
             if os.path.isfile(arg[0]):
-                f = open(arg[0])
+                f = open(arg[0], 'rb')
                 sz = os.stat(arg[0]).st_size
                 progress = tqdm.tqdm(range(sz), f"Uploading {arg[0]}", unit="B", unit_scale=True, unit_divisor=1024, ascii=True)
                 contents = f.read(1024*15)

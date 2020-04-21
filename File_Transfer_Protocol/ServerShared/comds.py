@@ -120,7 +120,7 @@ def send_files_longlist(arg, file_list, s, pwd):
             ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
         elif l>2:            
             if os.path.isfile(pwd+f):
-                with open(pwd+f) as file:
+                with open(pwd+f,'rb') as file:
                     contents = file.read()
                     if arg[2] in contents:
                         print(pwd+f)
@@ -147,10 +147,10 @@ def  ind_get(arg, s):
 ###### Functions for Hashfile command ######
 def verify_md5(filename, s, with_file_size = False):
     md5 = hashlib.md5()
-    fil = open(filename)
+    fil = open(filename, 'rb')
     contents = fil.read(1024*15)
     while len(contents)>0:
-        md5.update(contents.encode())
+        md5.update(contents)
         contents = fil.read(1024*15)
 
     if os.path.isfile(filename):
@@ -196,12 +196,12 @@ def file_hash(arg, s):
 ###### Functions for FileDownload command ######
 def send_tcp(filename,s):
     if os.path.isfile(filename):
-        f = open(filename)
+        f = open(filename,'rb')
         sz = os.stat(filename).st_size
         progress = tqdm.tqdm(range(sz), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024, ascii=True)
         contents = f.read(1024*15)
         while len(contents)>0:
-            s.send(contents.encode())
+            s.send(contents)
             progress.update(len(contents))
             contents = f.read(1024*15)
         s.send("   ".encode())
@@ -213,37 +213,28 @@ def send_tcp(filename,s):
 def send_udp(filename,s):
     s.send("ready_for_sending".encode())
     if s.recv(1024).decode()[-14:] == "begin_download":
+        md5 = hashlib.md5()
+        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        address = ('', 10000)
         if os.path.isfile(filename):
-            md5 = hashlib.md5()
-            udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            address = ('', 10000)
-            f = open(filename)
+            f = open(filename, 'rb')
             sz = os.stat(filename).st_size
 
             progress = tqdm.tqdm(range(sz), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024, ascii=True)
             contents = f.read(1024*15)
+
             while len(contents)>0:
-                to_send = contents.encode()
+                to_send = contents
                 udp_socket.sendto(to_send,address)
-                md5.update(contents.encode())
+                md5.update(contents)
                 progress.update(len(contents))
                 contents = f.read(1024*15)
 
-            st = os.stat(filename)
-            tim = time.ctime(st.st_mtime).split(" ")
-            date = tim[2]
-            month = tim[1]
-            year = tim[4]
-            timst = tim[3]
-            date_and_time = date+":"+month+":"+year+":"+timst
-            sz = st.st_size
-            print(filename+"   "+str(sz)+"   "+date_and_time+"   "+md5.hexdigest())
-            udp_socket.sendto(("   "+filename+"   "+str(sz)+"   "+date_and_time+"   "+md5.hexdigest()).encode(),address)
-            udp_socket.sendto("-|-|-".encode(), address)
+            verify_md5(filename, s, with_file_size=True)
+
         else:
             print("File doesn't exist")
-            s.send("inv_fil".encode())
-            s.send("-|-|-".encode())
+            udp_socket.sendto("inv_fil".encode(),address)
 
 def file_download(arg,s):
     if len(arg)>=2:
@@ -252,9 +243,11 @@ def file_download(arg,s):
         
         elif arg[0] == 'udp':
             send_udp(arg[1],s)
+            # udp_socket.sendto("-|-|-".encode(),address)
 
         else:
             s.send("inv_arg".encode())
+
 
 def file_upload(arg,s):
     fdata = ""
@@ -271,7 +264,7 @@ def file_upload(arg,s):
     if os.path.isfile(arg[0]):
         print("File already exists")
     else:
-        f = open(arg[0],'w')
+        f = open(arg[0],'wb')
         f.write(fdata)
         f.close()
 
