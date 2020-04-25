@@ -153,7 +153,7 @@ def cach_e(arg):
                             for diridx in range(len(pth)-1):
                                pa_th = pa_th+"/"+pth[diridx]
                                os.mkdir(pa_th) 
-            
+
                             os.mknod(arg[1])
                             f = open(arg[1],'wb')
                             f.writelines(fdata_lines[:-1])
@@ -292,7 +292,7 @@ def cach_e(arg):
 
 def explore_files(file_list, pwd):
     for file in file_list:
-        print(pwd + " " + file)
+        print(pwd + file)
         if os.path.isdir(file):
             explore_files(os.listdir(pwd + file + "/"),pwd + file + "/")
 
@@ -309,7 +309,7 @@ def upload(arg):
                 progress = tqdm.tqdm(range(sz), f"Uploading {arg[0]}", unit="B", unit_scale=True, unit_divisor=1024, ascii=True)
                 contents = f.read(1024*15)
                 while len(contents)>0:
-                    client_socket.send(contents.encode())
+                    client_socket.send(contents)
                     progress.update(len(contents))
                     contents = f.read(1024*15)
                 client_socket.send("-|-|-".encode())

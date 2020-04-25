@@ -266,16 +266,16 @@ def file_download(arg,s):
 
 
 def file_upload(arg,s):
-    fdata = ""
+    fdata = b''
     s.send("Ready".encode())
     while True:
         data = s.recv(1024)
-        if str(data.decode()[-5:]) == "-|-|-":
-            fdata = fdata + str(data.decode()[:-5])
+        if data[-1*len("-|-|-".encode()):] == "-|-|-".encode():
+            fdata = fdata + data[:-1*len("-|-|-".encode())]
             # print(fdata)
             break
         else:
-            fdata = fdata + str(data.decode())
+            fdata = fdata + data
     
     if os.path.isfile(arg[0]):
         print("File already exists")
