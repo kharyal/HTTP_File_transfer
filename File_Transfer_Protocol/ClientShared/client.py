@@ -104,6 +104,15 @@ def download(arg):
             return fdata, invalid_file
         else:
             if not invalid_file:
+                pth = arg[1].split("/")
+                if pth[0] == '.':
+                    pth.pop(0)
+                pa_th = "./"
+                for diridx in range(len(pth)-1):
+                   pa_th = pa_th+"/"+pth[diridx]
+                   os.mkdir(pa_th) 
+
+                os.mknod(arg[1])
                 f = open(arg[1],'wb')
                 f.write(downloaded_data)
                 f.close()

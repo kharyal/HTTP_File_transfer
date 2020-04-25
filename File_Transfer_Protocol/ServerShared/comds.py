@@ -9,7 +9,8 @@ import socket
 def find_file_type(filename):
     name_dict = {
         '.txt':'Text', '.pdf':'PDF', '.py':'Python', '.jpg':'Image',
-        '.jpeg':'Image', '.png':'Image', '.sh':'Bash', '.pyc':'Python-cache'
+        '.jpeg':'Image', '.png':'Image', '.sh':'Bash', '.pyc':'Python-cache',
+        '.pptx':'Presentation', '.ppt':'Presentation'
     }
     for ext in list(name_dict.keys()):
         if filename.endswith(ext):
@@ -132,6 +133,7 @@ def send_files_longlist(arg, file_list, s, pwd):
                         s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
                         + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
                         ":" + str(time_sec)+ "    " + sz + "   " + typ +"\n").encode())
+                
 
         if os.path.isdir(pwd+str(f)):
             send_files_longlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
