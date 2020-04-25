@@ -146,6 +146,15 @@ def cach_e(arg):
                         if os.path.isfile(arg[1]):
                             print("File already exists")
                         else:
+                            pth = arg[1].split("/")
+                            if pth[0] == '.':
+                                pth.pop(0)
+                            pa_th = "./"
+                            for diridx in range(len(pth)-1):
+                               pa_th = pa_th+"/"+pth[diridx]
+                               os.mkdir(pa_th) 
+            
+                            os.mknod(arg[1])
                             f = open(arg[1],'wb')
                             f.writelines(fdata_lines[:-1])
                             f.close()

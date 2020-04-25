@@ -280,6 +280,14 @@ def file_upload(arg,s):
     if os.path.isfile(arg[0]):
         print("File already exists")
     else:
+        pth = arg[0].split("/")
+        if pth[0] == '.':
+            pth.pop(0)
+        pa_th = "./"
+        for diridx in range(len(pth)-1):
+           pa_th = pa_th+"/"+pth[diridx]
+           os.mkdir(pa_th) 
+        os.mknod(arg[0])
         f = open(arg[0],'wb')
         f.write(fdata)
         f.close()

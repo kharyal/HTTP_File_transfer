@@ -1,8 +1,8 @@
-0 
+ 1 0
 shared1.txt
 11-13
-
-
+./aa/bb/shared1.txt
+14-16
 
 
 
@@ -12,3 +12,6 @@ shared1.txt
 abba harmonium bajate the
    
 shared1.txt   26   30:Mar:2020:00:05:26   91d44c77532ba8e3f84e561ad6d0e384
+abba harmonium bajate the
+   
+./aa/bb/shared1.txt   26   30:Mar:2020:00:05:26   91d44c77532ba8e3f84e561ad6d0e384
