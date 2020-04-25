@@ -64,29 +64,31 @@ def download(arg):
                 print("Unable to receive through udp")
                 exit()
             if client_socket.recv(1024).decode() == "ready_for_sending":
-                client_socket.send("begin_download".encode())
+                client_socket.send("send_sz".encode())
+            read_sz = client_socket.recv(1024).decode()
+
+            if read_sz == "inv_file":
+                read_sz = 0
+            else:
+                read_sz = int(read_sz)
+
+            client_socket.send("begin_download".encode())
             
             data = udp_sock.recvfrom(1024*15)
-            try:
-                while data:
-                    # data = udp_sock.recvfrom(1024*5)
-                    if data[0][:len("inv_fil".encode())] == "inv_fil".encode():
-                        print("File doesnt exist")
-                        invalid_file = True
-                    # print(data)
-                    # print("-|-|-".encode())
-                    # if data[0][-1*len("-|-|-".encode()):] == "-|-|-".encode():
-                    #     if not invalid_file:
-                    #         fdata = fdata + data[0][:-1*len("-|-|-".encode())]
-                    #     break
-                    if not invalid_file:
-                        fdata = fdata + data[0]
-                        break
-                    data = udp_sock.recvfrom(1024*15)
+            while len(fdata)<read_sz:
+                # data = udp_sock.recvfrom(1024*5)
+                if data[0][:len("inv_fil".encode())] == "inv_fil".encode():
+                    print("File doesnt exist")
+                    invalid_file = True
+                
+                if not invalid_file:
+                    fdata = fdata + data[0]
+                    break
+                data = udp_sock.recvfrom(1024*15)
 
-            except socket.timeout:
+            if not invalid_file:
                 print("File downloaded, ready to write...")
-                udp_sock.close()
+            #     udp_sock.close()
 
 
             if not invalid_file:
@@ -97,7 +99,8 @@ def download(arg):
                 stats = client_socket.recv(1024)
                 stats = stats.decode()
                 print(stats)
-                downloaded_data = fdata[:len(fdata)-len(stats)-2]
+                downloaded_data = fdata
+                # downloaded_data = fdata[:len(fdata)-len(stats)-2]
 
         if os.path.isfile(arg[1]):
             print("File already exists")

@@ -219,6 +219,15 @@ def send_tcp(filename,s):
 
 def send_udp(filename,s):
     s.send("ready_for_sending".encode())
+    if s.recv(1024).decode()[-7:] == "send_sz":
+        if os.path.isfile(filename):
+            f = open(filename, 'rb')
+            contents = f.read()
+            s.send(str(len(contents)).encode())
+            f.close()
+        else:
+            s.send("inv_fil".encode())
+
     if s.recv(1024).decode()[-14:] == "begin_download":
         md5 = hashlib.md5()
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
