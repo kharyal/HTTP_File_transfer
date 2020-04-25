@@ -15,6 +15,7 @@ IndexGet longlist ext
 IndexGet longlist ext keyword
 	Searches for files with extension ext containing the keyword
 	eg: IndexGet longlist *.txt abba
+	Won't work for non "utf-8" files.
 
 FileHash verify <filename>
 

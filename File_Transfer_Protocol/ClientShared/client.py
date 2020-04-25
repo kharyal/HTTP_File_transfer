@@ -112,6 +112,8 @@ def download(arg):
 def cach_e(arg):
     if arg[0] == "verify":
         present_in_cache = False
+        if not os.path.isfile("./.cache"):
+            os.mknod(".cache")
         ch = open(".cache", 'rb')
         lines_to_read = list(range(2*cache_sz+1))
         cache_info_lines = list(range(1,2*cache_sz+1))

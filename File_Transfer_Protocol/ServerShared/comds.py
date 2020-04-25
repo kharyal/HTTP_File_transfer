@@ -50,7 +50,8 @@ def send_files_shortlist(arg, file_list, s, pwd):
         end_d = datetime.date(end_year, end_month, end_date)
         st_t = datetime.time(start_time_hrs, start_time_min, start_time_sec)
         end_t = datetime.time(end_time_hrs, end_time_min, end_time_sec)
-
+        # print(st_d)
+        # print(end_d)
         for f in file_list:
             st = os.stat(pwd+str(f))
             tim = time.ctime(st.st_ctime).split(" ")
@@ -66,15 +67,19 @@ def send_files_shortlist(arg, file_list, s, pwd):
             year = int(tim[4])
             sz = str(st.st_size)
             typ = find_file_type(pwd+str(f))
+            # print(date," ",date, "")
             if l>3 and not (pwd+str(f)).endswith(arg[3][1:]):
                 if os.path.isdir(pwd+str(f)):
                     send_files_shortlist(arg, os.listdir(pwd+str(f)), s, pwd+str(f)+'/')
                 continue
 
             d = datetime.date(year, month, date)
+            # print(d)
+            # print("############")
+            # print(d<=end_d)
             if d>=st_d and d<=end_d:
                 tim = datetime.time(time_hrs, time_min, time_sec)
-                if tim>=st_t and tim<end_t:
+                if ((d==st_d or d==end_d) and (tim>=st_t and tim<end_t)) or (d!=st_d and d!=end_d):
                     print(pwd+str(f))
                     s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
                     + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
@@ -122,7 +127,7 @@ def send_files_longlist(arg, file_list, s, pwd):
             if os.path.isfile(pwd+f):
                 with open(pwd+f,'rb') as file:
                     contents = file.read()
-                    if arg[2] in contents:
+                    if arg[2] in contents.decode():
                         print(pwd+f)
                         s.send((pwd+str(f)+"   "+str(date)+ ":" + str(month) + ":" 
                         + str(year) + ":" + str(time_hrs) + ":" + str(time_min)+
