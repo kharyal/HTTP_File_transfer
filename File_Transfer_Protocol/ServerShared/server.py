@@ -7,12 +7,17 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = socket.gethostname()
 
-port = 9991
+port = 9990
 server_socket.bind((host, port))
 
 server_socket.listen(5)
 
 print('server listening...')
+
+if not os.path.isfile("./.indexlog"):
+            os.mknod(".indexlog")
+
+indf = open(".indexlog", 'a')
 
 while True:
     client_socket, addr = server_socket.accept()
@@ -28,6 +33,7 @@ while True:
         command = str(data.decode()).split(" ")
 
         if command[0] == "IndexGet":
+            indf.write(data.decode() + "\n")
             comds.ind_get(command[1:],client_socket)
             client_socket.send("-|-|-".encode())
 

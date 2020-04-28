@@ -7,7 +7,7 @@ cache_sz = 5
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = socket.gethostname()
-port = 9991
+port = 9990
 client_socket.connect((host, port))
 
 def get_data():
@@ -185,7 +185,7 @@ def cach_e(arg):
                     # print(fcfs)
                     fcfs = list(map(int, fcfs))
                 if len(fcfs)>=cache_sz:
-                    lines_to_remove = cache_data[2*fcfs[-1]+2].strip('\n').split("-")
+                    lines_to_remove = cache_data[2*fcfs[-1]+2].decode().strip('\n').split("-")
                     lines_to_remove = list(map(int, lines_to_remove))
                     no_lines_to_remove = lines_to_remove[1]-lines_to_remove[0]+1
                     l = []
@@ -318,9 +318,13 @@ def upload(arg):
         else:
             print("Not enough arguments")
 
+if not os.path.isfile("./.indexlog"):
+            os.mknod(".indexlog")
 
+indf = open(".indexlog", 'a')
 
 while True:
+
     print("$> ", end = " ")
     cmd = str(input())
     command = cmd.split(" ")
@@ -329,6 +333,7 @@ while True:
     # client_socket.close()
 
     if command[0] == "IndexGet":
+        indf.write(cmd+ "\n")
         get_data()
     elif command[0] == "FileHash":
         get_data()

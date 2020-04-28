@@ -1,0 +1,29 @@
+IndexGet shortlist
+IndexGet shortlist
+IndexGet shortlist 03:Apr:2020:00:00:00 05:Apr:2020:00:00:00
+IndexGet shortlist 29:Mar:2020:00:00:00 01:Apr:2020:00:00:00
+IndexGet shortlist 03:Apr:2020:00:00:00 05:Apr:2020:00:00:00
+IndexGet shortlist 10:Mar:2020:00:00:00 29:Apr:2020:00:00:00
+IndexGet shortlist 10:Mar:2020:00:00:00 29:Apr:2020:00:00:00 *.txt
+IndexGet shortlist 10:Mar:2020:00:00:00 29:Apr:2020:00:00:00 *.pptx
+IndexGet longlist *.txt
+IndexGet longlist *.pptx
+IndexGet longlist *.txt abba
+IndexGet longlist *.txt slap
+IndexGet shortlist
+IndexGet shortlist 02:Apr:2020:00:00:00 05:Apr:2020:00:00:00
+IndexGet shortlist 02:Apr:2020:00:00:00 05:Apr:2020:00:00:00 *.txt
+IndexGet longlist
+IndexGet longlist *.txt
+IndexGet longlist *.py
+IndexGet longlist *.pptx
+IndexGet longlist *.txt abba
+IndexGet shortlist
+IndexGet shortlist 02:Apr:2020:00:00:00 05:Apr:2020:00:00:00
+IndexGet shortlist 02:Apr:2020:00:00:00 05:Apr:2020:00:00:00 *.txt
+IndexGet longlist
+IndexGet longlist *.txt
+IndexGet longlist *.py
+IndexGet longlist *.txt abba
+IndexGet shortlist
+IndexGet shortlist
